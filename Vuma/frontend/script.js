@@ -105,7 +105,7 @@ function setupSignupForm() {
         if (result.success) {
             showMessage("Account created successfully! Redirecting to login...", "success");
             setTimeout(function() {
-                window.location.href = 'login.html';
+                window.location.href = 'index.html';  // ✅ CHANGED: login.html → index.html
             }, 2000);
         } else {
             showMessage(result.message || "Registration failed. Please try again.", "error");
@@ -181,7 +181,11 @@ function showMessage(message, type) {
 
 // ==================== BACKEND API INTEGRATION ====================
 
+// ✅ FOR LOCAL DEVELOPMENT:
 const API_BASE = 'http://localhost/vuma/backend/api';
+
+// ✅ FOR PRODUCTION (you'll update this later):
+// const API_BASE = 'https://your-backend-url.herokuapp.com/api';
 
 // Login function that connects to backend
 async function loginToBackend(role, email, password) {
