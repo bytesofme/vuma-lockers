@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Agent - Vuma Lockers</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .agent-header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .deposit-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .success-section {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .otp-code {
+            font-size: 32px;
+            font-weight: bold;
+            color: #e74c3c;
+            letter-spacing: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        .debug-info {
+            background: #e2e3e5;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="agent-header">
+            <div>
+                <h1>Welcome, Delivery Agent!</h1>
+                <p>Deposit parcels and generate OTP codes for customers</p>
+            </div>
+            <div>
+                <a href="login.html" class="btn btn-secondary">🚪 Logout</a>
+            </div>
+        </div>
+
+        <!-- Deposit Parcel Section -->
+        <div class="deposit-section">
+            <h2>📦 Deposit New Parcel</h2>
+            
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+            <div id="debugInfo" class="debug-info" style="display: none;"></div>
+            
+            <form id="depositForm">
+                <div class="form-group">
+                    <label for="trackingNumber">Tracking Number:</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="trackingNumber" class="form-input" placeholder="Enter tracking number" required>
+                        <button type="button" class="btn btn-primary" onclick="simulateScan()">📷 Scan Barcode</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="recipientPhone">Recipient Phone:</label>
+                    <div class="phone-input">
+                        <select id="countryCode" style="width: 80px;">
+                            <option value="+254">+254</option>
+                        </select>
+                        <input type="tel" id="recipientPhone" class="form-input" placeholder="712345678" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="lockerSize">Parcel Size:</label>
+                    <select id="lockerSize" class="form-input" required>
+                        <option value="">Select size</option>
+                        <option value="small">Small (S)</option>
+                        <option value="medium">Medium (M)</option>
+                        <option value="large">Large (L)</option>
+                        <option value="xlarge">Extra Large (XL)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full" id="depositBtn">
+                    ✅ Deposit Parcel & Generate OTP
+                </button>
+            </form>
+
+            <!-- Success Message -->
+            <div class="success-section" id="successSection" style="display: none;">
+                <h3>🎉 Parcel Deposited Successfully!</h3>
+                <div style="background: white; padding: 20px; border-radius: 5px; margin: 15px 0;">
+                    <strong>Locker Assigned:</strong> <span id="resultLocker" style="color: #2980b9; font-size: 20px;">-</span><br><br>
+                    <strong>OTP Code:</strong> <div class="otp-code" id="resultOTP">-</div>
+                    <strong>Status:</strong> <span style="color: #27ae60;">Ready for pickup</span>
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                    📦 Deposit Another Parcel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Backend API Integration - WORKING VERSION
+        const API_BASE = '../backend/api';
+
+        // Show error message
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        // Show debug info
+        function showDebug(info) {
+            const debugDiv = document.getElementById('debugInfo');
+            debugDiv.textContent = info;
+            debugDiv.style.display = 'block';
+        }
+
+        // Deposit parcel function - WORKING VERSION
+        async function depositParcel(trackingNumber, recipientPhone, parcelSize) {
+            try {
+                const requestData = {
+                    tracking_number: trackingNumber,
+                    recipient_phone: recipientPhone,
+                    parcel_size: parcelSize,
+                    agent_id: 2
+                };
+
+                showDebug('Sending: ' + JSON.stringify(requestData));
+                
+                const response = await fetch(`${API_BASE}/deposit-parcel.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                const data = await response.json();
+                showDebug('Received: ' + JSON.stringify(data));
+                return data;
+
+            } catch (error) {
+                console.error('Deposit error:', error);
+                return { 
+                    success: false, 
+                    message: 'Connection error: ' + error.message 
+                };
+            }
+        }
+
+        // Form submission handler - WORKING VERSION
+        document.getElementById('depositForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            // Hide previous messages
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('debugInfo').style.display = 'none';
+            
+            const trackingNumber = document.getElementById('trackingNumber').value.trim();
+            const recipientPhone = document.getElementById('countryCode').value + document.getElementById('recipientPhone').value.trim();
+            const parcelSize = document.getElementById('lockerSize').value;
+            
+            // Validation
+            if (!trackingNumber || !recipientPhone || !parcelSize) {
+                showError('Please fill all fields');
+                return;
+            }
+
+            if (recipientPhone.length !== 13) { // +254712345678
+                showError('Please enter a valid 9-digit phone number');
+                return;
+            }
+            
+            // Show loading
+            const button = document.getElementById('depositBtn');
+            const originalText = button.innerHTML;
+            button.innerHTML = '⏳ Processing...';
+            button.disabled = true;
+            
+            // Call BACKEND API
+            const result = await depositParcel(trackingNumber, recipientPhone, parcelSize);
+            
+            if (result.success) {
+                // Show success from BACKEND
+                document.getElementById('resultLocker').textContent = result.locker_id;
+                document.getElementById('resultOTP').textContent = result.otp_code;
+                document.getElementById('successSection').style.display = 'block';
+                document.getElementById('depositForm').style.display = 'none';
+                document.getElementById('debugInfo').style.display = 'none';
+                
+            } else {
+                showError('Error: ' + result.message);
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        });
+
+        function resetForm() {
+            document.getElementById('depositForm').reset();
+            document.getElementById('depositForm').style.display = 'block';
+            document.getElementById('successSection').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('debugInfo').style.display = 'none';
+            document.getElementById('depositBtn').innerHTML = '✅ Deposit Parcel & Generate OTP';
+            document.getElementById('depositBtn').disabled = false;
+        }
+
+        function simulateScan() {
+            const trackingNumbers = ['TRK123456789', 'TRK987654321', 'TRK555666777'];
+            const randomTracking = trackingNumbers[Math.floor(Math.random() * trackingNumbers.length)];
+            document.getElementById('trackingNumber').value = randomTracking;
+            document.getElementById('recipientPhone').value = '712345678';
+            document.getElementById('lockerSize').value = 'medium';
+        }
+
+        // Check login
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentUser = localStorage.getItem('currentUser');
+            if (!currentUser) {
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
+</body>
+</html>

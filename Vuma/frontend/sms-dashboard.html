@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS Dashboard - Vuma Lockers</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .dashboard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
+        }
+        
+        .sms-container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .sms-card {
+            background: #f8f9fa;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+        
+        .sms-card:hover {
+            transform: translateX(5px);
+            background: #e8f5e8;
+        }
+        
+        .sms-phone {
+            font-weight: bold;
+            color: #1976d2;
+            font-size: 1.1em;
+        }
+        
+        .sms-message {
+            margin: 12px 0;
+            line-height: 1.5;
+            color: #333;
+        }
+        
+        .sms-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            color: #666;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+        
+        .live-badge {
+            background: #dc3545;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .new-sms {
+            animation: highlight 2s ease-in-out;
+        }
+        
+        @keyframes highlight {
+            0% { background: #ffeb3b; }
+            100% { background: #e8f5e8; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1>📱 Vuma SMS Notification System</h1>
+            <p>Real-time SMS delivery tracking and analytics</p>
+            <div class="live-badge">● LIVE</div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <h3>📨 Total SMS Sent</h3>
+                <div class="stat-number" id="totalSMS">0</div>
+                <p>All-time deliveries</p>
+            </div>
+            <div class="stat-card">
+                <h3>💰 This Month</h3>
+                <div class="stat-number" id="monthCost">KES 0</div>
+                <p>SMS costs</p>
+            </div>
+            <div class="stat-card">
+                <h3>✅ Delivery Rate</h3>
+                <div class="stat-number">98.5%</div>
+                <p>Successful deliveries</p>
+            </div>
+            <div class="stat-card">
+                <h3>⏱️ Avg. Response</h3>
+                <div class="stat-number">2.3h</div>
+                <p>Time to collect</p>
+            </div>
+        </div>
+
+        <!-- SMS Messages -->
+        <div class="sms-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Recent SMS Deliveries</h2>
+                <button class="btn btn-primary" onclick="addDemoSMS()">+ Add Demo SMS</button>
+            </div>
+            
+            <div id="smsList">
+                <!-- SMS messages will appear here -->
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="clearSMS()">Clear All</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample SMS data for demonstration
+        let smsMessages = [
+            {
+                id: 1,
+                to: "+254712345678",
+                message: "📦 VUMA PARCEL ALERT: Package #TRK123456789 is ready at Locker LKR-M01. Your OTP: 123456 (Valid 15 mins). Collect at Eldoret Mall.",
+                status: "delivered",
+                timestamp: "5 minutes ago",
+                cost: "KES 1.00"
+            },
+            {
+                id: 2,
+                to: "+254723456789",
+                message: "📦 VUMA PARCEL ALERT: Package #TRK987654321 is ready at Locker LKR-S02. Your OTP: 654321 (Valid 15 mins). Collect at Eldoret Mall.",
+                status: "delivered", 
+                timestamp: "12 minutes ago",
+                cost: "KES 1.00"
+            },
+            {
+                id: 3,
+                to: "+254734567890",
+                message: "✅ VUMA COLLECTION: Package #TRK555666777 collected from LKR-M03. OTP verified successfully. Thank you for using Vuma Lockers!",
+                status: "delivered",
+                timestamp: "1 hour ago", 
+                cost: "KES 1.00"
+            }
+        ];
+
+        // Display SMS messages
+        function displaySMS() {
+            const smsList = document.getElementById('smsList');
+            smsList.innerHTML = '';
+
+            smsMessages.forEach(sms => {
+                const smsCard = document.createElement('div');
+                smsCard.className = 'sms-card';
+                smsCard.innerHTML = `
+                    <div style="display: flex; justify-content: between; align-items: start;">
+                        <div style="flex: 1;">
+                            <div class="sms-phone">📞 ${sms.to}</div>
+                            <div class="sms-message">${sms.message}</div>
+                            <div class="sms-meta">
+                                <span>🕒 ${sms.timestamp}</span>
+                                <span>${sms.cost}</span>
+                                <span style="color: #28a745;">✓ ${sms.status}</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-outline" onclick="deleteSMS(${sms.id})">×</button>
+                    </div>
+                `;
+                smsList.appendChild(smsCard);
+            });
+
+            // Update stats
+            document.getElementById('totalSMS').textContent = smsMessages.length;
+            document.getElementById('monthCost').textContent = `KES ${smsMessages.length}`;
+        }
+
+        // Add demo SMS message
+        function addDemoSMS() {
+            const newSMS = {
+                id: Date.now(),
+                to: "+2547" + Math.floor(10000000 + Math.random() * 90000000),
+                message: `📦 VUMA PARCEL ALERT: Package #TRK${Math.floor(100000000 + Math.random() * 900000000)} is ready at Locker LKR-${['S','M','L'][Math.floor(Math.random()*3)]}0${Math.floor(1+Math.random()*9)}. Your OTP: ${Math.floor(100000 + Math.random() * 900000)} (Valid 15 mins). Collect at Eldoret Mall.`,
+                status: "delivered",
+                timestamp: "Just now",
+                cost: "KES 1.00"
+            };
+
+            smsMessages.unshift(newSMS);
+            displaySMS();
+            
+            // Highlight new message
+            const firstCard = document.querySelector('.sms-card');
+            firstCard.classList.add('new-sms');
+        }
+
+        // Delete SMS message
+        function deleteSMS(id) {
+            smsMessages = smsMessages.filter(sms => sms.id !== id);
+            displaySMS();
+        }
+
+        // Clear all SMS
+        function clearSMS() {
+            if (confirm('Clear all SMS messages?')) {
+                smsMessages = [];
+                displaySMS();
+            }
+        }
+
+        // Simulate real-time updates (every 45 seconds)
+        function startRealTimeUpdates() {
+            setInterval(() => {
+                if (Math.random() > 0.7) { // 30% chance to add new SMS
+                    addDemoSMS();
+                }
+            }, 45000);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            displaySMS();
+            startRealTimeUpdates();
+            
+            // Check if user is logged in
+            const currentUser = localStorage.getItem('currentUser');
+            if (!currentUser) {
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
+</body>
+</html>
