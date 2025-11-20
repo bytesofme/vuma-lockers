@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Setup Login Form - FIXED VERSION
+// Setup Login Form - DEMO VERSION FOR PRESENTATION
 function setupLoginForm() {
     const loginForm = document.getElementById('loginForm');
     
@@ -37,8 +37,8 @@ function setupLoginForm() {
         const button = loginForm.querySelector('button[type="submit"]');
         showLoading(button, "Logging in...");
         
-        // ✅ USE REAL BACKEND LOGIN (not demo)
-        const result = await loginToBackend(role, email, password);
+        // ✅ USE DEMO LOGIN FOR PRESENTATION (no backend needed)
+        const result = await demoLogin(role, email, password);
         
         if (result.success) {
             showMessage("Login successful! Redirecting...", "success");
@@ -50,7 +50,7 @@ function setupLoginForm() {
     });
 }
 
-// Setup Signup Form
+// Setup Signup Form - DEMO VERSION FOR PRESENTATION
 function setupSignupForm() {
     const signupForm = document.getElementById('signupForm');
     
@@ -91,21 +91,13 @@ function setupSignupForm() {
         const button = signupForm.querySelector('button[type="submit"]');
         showLoading(button, "Creating Account...");
         
-        // Use real backend registration
-        const userData = {
-            name: fullName,
-            email: email,
-            phone: phone,
-            password: password,
-            role: role
-        };
-        
-        const result = await registerToBackend(userData);
+        // Use demo registration
+        const result = await demoRegister(role, fullName, phone, email, password);
         
         if (result.success) {
             showMessage("Account created successfully! Redirecting to login...", "success");
             setTimeout(function() {
-                window.location.href = 'index.html';  // ✅ CHANGED: login.html → index.html
+                window.location.href = 'index.html';
             }, 2000);
         } else {
             showMessage(result.message || "Registration failed. Please try again.", "error");
@@ -179,15 +171,90 @@ function showMessage(message, type) {
     }, 3000);
 }
 
-// ==================== BACKEND API INTEGRATION ====================
+// ==================== DEMO FUNCTIONS FOR PRESENTATION ====================
 
-// ✅ FOR LOCAL DEVELOPMENT:
+// Demo login function - works without backend
+async function demoLogin(role, email, password) {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            // Accept any login for demo
+            if (email && password) {
+                resolve({
+                    success: true,
+                    data: {
+                        user_id: Math.floor(Math.random() * 1000),
+                        name: email.split('@')[0],
+                        role: role
+                    }
+                });
+            } else {
+                resolve({
+                    success: false,
+                    message: "Please enter email and password"
+                });
+            }
+        }, 1500);
+    });
+}
+
+// Demo register function - works without backend
+async function demoRegister(role, fullName, phone, email, password) {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve({
+                success: true,
+                message: "Account created successfully!"
+            });
+        }, 1500);
+    });
+}
+
+// Demo parcel deposit function
+async function demoDepositParcel(trackingNumber, recipientPhone, parcelSize) {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            const lockerSizes = {
+                'small': 'S',
+                'medium': 'M', 
+                'large': 'L',
+                'xlarge': 'XL'
+            };
+            
+            const sizeCode = lockerSizes[parcelSize] || 'M';
+            const lockerId = `LKR-${sizeCode}${Math.floor(Math.random() * 20) + 1}`;
+            const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+            
+            resolve({
+                success: true,
+                message: "Parcel deposited successfully! SMS sent to customer.",
+                locker_id: lockerId,
+                otp_code: otpCode,
+                sms_data: {
+                    to: recipientPhone,
+                    message: `📦 VUMA: Package #${trackingNumber} ready at ${lockerId}. OTP: ${otpCode}`,
+                    status: 'delivered'
+                }
+            });
+        }, 2000);
+    });
+}
+
+// Store user data in localStorage for demo
+function storeDemoUser(role, email) {
+    localStorage.setItem('currentUser', JSON.stringify({
+        id: Math.floor(Math.random() * 1000),
+        name: email.split('@')[0],
+        email: email,
+        role: role,
+        loginTime: new Date().toISOString()
+    }));
+}
+
+// ==================== BACKUP: ORIGINAL BACKEND FUNCTIONS ====================
+
+// Keep these for when you deploy backend later
 const API_BASE = 'http://localhost/vuma/backend/api';
 
-// ✅ FOR PRODUCTION (you'll update this later):
-// const API_BASE = 'https://your-backend-url.herokuapp.com/api';
-
-// Login function that connects to backend
 async function loginToBackend(role, email, password) {
     try {
         const response = await fetch(`${API_BASE}/login.php`, {
@@ -204,7 +271,6 @@ async function loginToBackend(role, email, password) {
         const data = await response.json();
         
         if (data.success) {
-            // Store user data in localStorage
             localStorage.setItem('currentUser', JSON.stringify({
                 id: data.user_id,
                 name: data.name,
@@ -223,7 +289,6 @@ async function loginToBackend(role, email, password) {
     }
 }
 
-// Register function
 async function registerToBackend(userData) {
     try {
         const response = await fetch(`${API_BASE}/register.php`, {
@@ -240,16 +305,4 @@ async function registerToBackend(userData) {
         console.error('Registration error:', error);
         return { success: false, message: 'Network error. Please try again.' };
     }
-}
-
-// Demo functions (keep for reference but not used in production)
-function attemptLogin(role, email, password) {
-    // For demo only - not used in fixed version
-    return password.length > 3;
-}
-
-function attemptSignup(role, fullName, phone, email, password) {
-    // For demo only - not used in fixed version
-    console.log("New user:", { role, fullName, phone, email });
-    return true;
 }
