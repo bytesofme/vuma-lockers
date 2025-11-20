@@ -29,10 +29,10 @@ class Database {
     public function getConnection() {
         $this->conn = null;
         try {
-            $dsn = "mysql:host=" . $this->host . ";port=" . $this->port . ";dbname=" . $this->db_name;
+            $dsn = "mysql:host=" . $this->host . ";port=" . $this->port . ";dbname=" . $this->db_name . ";charset=utf8mb4";
             $this->conn = new PDO($dsn, $this->username, $this->password);
-            $this->conn->exec("set names utf8");
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
             error_log("✅ Database connected successfully to: " . $this->host);
         } catch(PDOException $exception) {
             error_log("❌ Database connection failed: " . $exception->getMessage());
