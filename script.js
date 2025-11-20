@@ -253,8 +253,7 @@ function storeDemoUser(role, email) {
 // ==================== BACKUP: ORIGINAL BACKEND FUNCTIONS ====================
 
 // Keep these for when you deploy backend later
-const API_BASE = 'https://your-app-name.up.railway.app/api';;
-
+const API_BASE = 'https://vuma-lockers.app/api';
 async function loginToBackend(role, email, password) {
     try {
         const response = await fetch(`${API_BASE}/login.php`, {
@@ -306,4 +305,5 @@ async function registerToBackend(userData) {
         return { success: false, message: 'Network error. Please try again.' };
     }
 }
+
 
