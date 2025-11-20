@@ -4,32 +4,39 @@ class Database {
     private $db_name;
     private $username;
     private $password;
+    private $port;
     public $conn;
 
     public function __construct() {
-        // For production (Heroku/Railway)
-        if (getenv('CLEARDB_DATABASE_URL')) {
-            $url = parse_url(getenv('CLEARDB_DATABASE_URL'));
-            $this->host = $url['host'];
-            $this->username = $url['user'];
-            $this->password = $url['pass'];
-            $this->db_name = substr($url['path'], 1);
-        } else {
-            // For local development
+        // For Railway MySQL
+        if (getenv('MYSQLHOST')) {
+            $this->host = getenv('MYSQLHOST');
+            $this->username = getenv('MYSQLUSER');
+            $this->password = getenv('MYSQLPASSWORD');
+            $this->db_name = getenv('MYSQLDATABASE');
+            $this->port = getenv('MYSQLPORT') ?: '3306';
+        }
+        // For local development
+        else {
             $this->host = "localhost";
             $this->db_name = "vuma_lockers";
             $this->username = "root";
             $this->password = "";
+            $this->port = "3306";
         }
     }
 
     public function getConnection() {
         $this->conn = null;
         try {
-            $this->conn = new PDO("mysql:host=" . $this->host . ";dbname=" . $this->db_name, $this->username, $this->password);
+            $dsn = "mysql:host=" . $this->host . ";port=" . $this->port . ";dbname=" . $this->db_name;
+            $this->conn = new PDO($dsn, $this->username, $this->password);
             $this->conn->exec("set names utf8");
+            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            error_log("✅ Database connected successfully to: " . $this->host);
         } catch(PDOException $exception) {
-            echo "Connection error: " . $exception->getMessage();
+            error_log("❌ Database connection failed: " . $exception->getMessage());
+            return null;
         }
         return $this->conn;
     }
