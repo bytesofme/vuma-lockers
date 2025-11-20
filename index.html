@@ -8,68 +8,74 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         .hero-background {
-            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), 
-                        url('https://images.unsplash.com/photo-1565689228863-61e24e0e50b2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.9), rgba(124, 58, 237, 0.9)),
+                        url('https://images.unsplash.com/photo-1565689228863-61e24e0e50b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'),
+                        linear-gradient(135deg, #667eea, #764ba2);
             background-size: cover;
             background-position: center;
-            background-attachment: fixed;
+            background-repeat: no-repeat;
         }
         
-        @media (max-width: 768px) {
-            .hero-background {
-                background-attachment: scroll;
-            }
+        /* Fallback if image doesn't load */
+        .hero-background {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.9), rgba(124, 58, 237, 0.9)),
+                        linear-gradient(135deg, #667eea, #764ba2);
         }
     </style>
 </head>
 <body class="min-h-screen">
-    <!-- Hero Section with Background Image -->
+    <!-- Hero Section with Background -->
     <div class="hero-background min-h-screen flex items-center justify-center p-6">
-        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-4xl w-full backdrop-blur-sm bg-white/95">
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-4xl w-full">
             <div class="md:flex">
-                <!-- Left Side - Branding with Context -->
-                <div class="md:w-1/2 bg-gradient-to-br from-blue-600/90 to-blue-800/90 text-white p-8 md:p-12">
+                <!-- Left Side - Branding -->
+                <div class="md:w-1/2 bg-gradient-to-br from-blue-600 to-blue-800 text-white p-8 md:p-12">
                     <div class="flex items-center space-x-3 mb-6">
-                        <i class="fas fa-lock text-2xl"></i>
-                        <h1 class="text-2xl font-bold">Vuma Lockers</h1>
+                        <div class="bg-white/20 p-3 rounded-xl">
+                            <i class="fas fa-lock text-2xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold">Vuma Lockers</h1>
+                            <p class="text-blue-200 text-sm">Eldoret's Smart Delivery</p>
+                        </div>
                     </div>
                     
-                    <h2 class="text-3xl font-bold mb-4">Smart Parcel Delivery in Eldoret</h2>
+                    <h2 class="text-3xl font-bold mb-4">Secure Parcel Delivery</h2>
                     <p class="text-blue-100 mb-8 leading-relaxed">
-                        Experience the future of package management. Secure, automated locker solutions that make parcel delivery and pickup effortless for everyone.
+                        Revolutionizing package management with automated locker solutions. 
+                        Safe, convenient, and available 24/7 for all your delivery needs.
                     </p>
                     
-                    <!-- Success Stories -->
+                    <!-- Features -->
                     <div class="space-y-4 mb-8">
-                        <div class="flex items-start space-x-3">
-                            <i class="fas fa-check-circle text-green-300 mt-1"></i>
-                            <div>
-                                <span class="font-semibold">5000+</span>
-                                <span class="text-blue-200"> successful deliveries</span>
-                            </div>
+                        <div class="flex items-center space-x-3 bg-white/10 rounded-lg p-3">
+                            <i class="fas fa-shield-alt text-green-300"></i>
+                            <span class="text-blue-100">Military-grade security</span>
                         </div>
-                        <div class="flex items-start space-x-3">
-                            <i class="fas fa-star text-yellow-300 mt-1"></i>
-                            <div>
-                                <span class="font-semibold">98%</span>
-                                <span class="text-blue-200"> customer satisfaction</span>
-                            </div>
+                        <div class="flex items-center space-x-3 bg-white/10 rounded-lg p-3">
+                            <i class="fas fa-bolt text-yellow-300"></i>
+                            <span class="text-blue-100">Instant SMS notifications</span>
                         </div>
-                        <div class="flex items-start space-x-3">
-                            <i class="fas fa-clock text-blue-200 mt-1"></i>
-                            <div>
-                                <span class="font-semibold">24/7</span>
-                                <span class="text-blue-200"> access to lockers</span>
-                            </div>
+                        <div class="flex items-center space-x-3 bg-white/10 rounded-lg p-3">
+                            <i class="fas fa-clock text-blue-200"></i>
+                            <span class="text-blue-100">24/7 access to lockers</span>
                         </div>
                     </div>
 
-                    <!-- Testimonial -->
-                    <div class="bg-blue-500/30 rounded-lg p-4 border-l-4 border-green-400">
-                        <p class="text-blue-100 italic text-sm">
-                            "Vuma Lockers made receiving my packages so convenient! No more waiting for delivery trucks."
-                        </p>
-                        <p class="text-blue-200 text-xs mt-2">- Sarah K., Customer</p>
+                    <!-- Stats -->
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                            <div class="text-2xl font-bold text-white">5,000+</div>
+                            <div class="text-blue-200 text-xs">Deliveries</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-white">98%</div>
+                            <div class="text-blue-200 text-xs">Satisfaction</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-white">24/7</div>
+                            <div class="text-blue-200 text-xs">Available</div>
+                        </div>
                     </div>
                 </div>
 
