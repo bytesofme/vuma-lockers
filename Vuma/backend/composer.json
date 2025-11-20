@@ -1,0 +1,6 @@
+{
+    "name": "vuma-lockers/backend",
+    "require": {
+        "php": "^7.3"
+    }
+}
