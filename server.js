@@ -30,14 +30,14 @@ async function initializeDatabase() {
     try {
         const connection = await pool.getConnection();
         
-        // Create lockers table
+        // Create lockers table - FIXED: changed current_user to current_user_id
         await connection.execute(`
             CREATE TABLE IF NOT EXISTS lockers (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 locker_number INT UNIQUE NOT NULL,
                 status ENUM('available', 'occupied', 'maintenance') DEFAULT 'available',
                 is_open BOOLEAN DEFAULT FALSE,
-                current_user VARCHAR(50) DEFAULT NULL,
+                current_user_id VARCHAR(50) DEFAULT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             )
@@ -175,7 +175,7 @@ app.post('/api/lockers/:lockerNumber/maintain', async (req, res) => {
         const lockerNumber = req.params.lockerNumber;
         
         await pool.execute(
-            'UPDATE lockers SET status = "maintenance", current_user = NULL WHERE locker_number = ?',
+            'UPDATE lockers SET status = "maintenance", current_user_id = NULL WHERE locker_number = ?',
             [lockerNumber]
         );
 
@@ -195,7 +195,7 @@ app.post('/api/lockers/:lockerNumber/release', async (req, res) => {
         const lockerNumber = req.params.lockerNumber;
         
         await pool.execute(
-            'UPDATE lockers SET status = "available", current_user = NULL WHERE locker_number = ?',
+            'UPDATE lockers SET status = "available", current_user_id = NULL WHERE locker_number = ?',
             [lockerNumber]
         );
 
@@ -231,7 +231,7 @@ app.post('/api/lockers/:lockerNumber/occupy', async (req, res) => {
 
         // Occupy the locker
         await pool.execute(
-            'UPDATE lockers SET status = "occupied", current_user = ? WHERE locker_number = ?',
+            'UPDATE lockers SET status = "occupied", current_user_id = ? WHERE locker_number = ?',
             [studentId, lockerNumber]
         );
 
