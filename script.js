@@ -1,309 +1,314 @@
-// This function runs when any page loads
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("Vuma Lockers System Loaded!");
-    
-    // Check if we're on login page
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        setupLoginForm();
-    }
-    
-    // Check if we're on signup page
-    const signupForm = document.getElementById('signupForm');
-    if (signupForm) {
-        setupSignupForm();
-    }
-});
+// Configuration
+const BACKEND_URL = "https://vuma-lockers.up.railway.app";
 
-// Setup Login Form - DEMO VERSION FOR PRESENTATION
-function setupLoginForm() {
-    const loginForm = document.getElementById('loginForm');
-    
-    loginForm.addEventListener('submit', async function(event) {
-        event.preventDefault();
-        
-        // Get form values
-        const role = document.getElementById('userRole').value;
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        
-        // Simple validation
-        if (!role || !email || !password) {
-            showMessage("Please fill in all fields!", "error");
-            return;
-        }
-        
-        // Show loading
-        const button = loginForm.querySelector('button[type="submit"]');
-        showLoading(button, "Logging in...");
-        
-        // ✅ USE DEMO LOGIN FOR PRESENTATION (no backend needed)
-        const result = await demoLogin(role, email, password);
-        
-        if (result.success) {
-            showMessage("Login successful! Redirecting...", "success");
-            redirectToDashboard(role);
+// DOM Elements
+const lockerGrid = document.getElementById('lockerGrid');
+const adminPanel = document.getElementById('adminPanel');
+const userPanel = document.getElementById('userPanel');
+const adminLoginBtn = document.getElementById('adminLoginBtn');
+const userLoginBtn = document.getElementById('userLoginBtn');
+const adminLoginForm = document.getElementById('adminLoginForm');
+const userLoginForm = document.getElementById('userLoginForm');
+const adminView = document.getElementById('adminView');
+const userView = document.getElementById('userView');
+const logoutBtn = document.getElementById('logoutBtn');
+const userLogoutBtn = document.getElementById('userLogoutBtn');
+const adminMessage = document.getElementById('adminMessage');
+const userMessage = document.getElementById('userMessage');
+
+// State
+let currentUser = null;
+let isAdmin = false;
+let lockers = [];
+
+// Initialize the app
+async function initApp() {
+    await loadLockers();
+    checkAuthState();
+    setupEventListeners();
+}
+
+// Event Listeners
+function setupEventListeners() {
+    adminLoginBtn.addEventListener('click', () => toggleLoginForm('admin'));
+    userLoginBtn.addEventListener('click', () => toggleLoginForm('user'));
+    adminLoginForm.addEventListener('submit', handleAdminLogin);
+    userLoginForm.addEventListener('submit', handleUserLogin);
+    logoutBtn.addEventListener('click', handleLogout);
+    userLogoutBtn.addEventListener('click', handleLogout);
+}
+
+// Toggle login forms
+function toggleLoginForm(type) {
+    adminLoginForm.style.display = type === 'admin' ? 'block' : 'none';
+    userLoginForm.style.display = type === 'user' ? 'block' : 'none';
+}
+
+// Handle Admin Login
+async function handleAdminLogin(e) {
+    e.preventDefault();
+    const username = document.getElementById('adminUsername').value;
+    const password = document.getElementById('adminPassword').value;
+
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/admin/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            currentUser = { username, isAdmin: true };
+            isAdmin = true;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            showAdminView();
+            showMessage('admin', 'Login successful!', 'success');
         } else {
-            showMessage(result.message || "Invalid email or password", "error");
-            hideLoading(button, "Login to System");
+            showMessage('admin', data.error || 'Login failed', 'error');
         }
-    });
+    } catch (error) {
+        showMessage('admin', 'Network error. Please try again.', 'error');
+    }
 }
 
-// Setup Signup Form - DEMO VERSION FOR PRESENTATION
-function setupSignupForm() {
-    const signupForm = document.getElementById('signupForm');
-    
-    signupForm.addEventListener('submit', async function(event) {
-        event.preventDefault();
-        
-        // Get form values
-        const role = document.getElementById('userRole').value;
-        const fullName = document.getElementById('fullName').value;
-        const phone = document.getElementById('phone').value;
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        const confirmPassword = document.getElementById('confirmPassword').value;
-        const agreeTerms = document.getElementById('agreeTerms').checked;
-        
-        // Validation
-        if (!role || !fullName || !phone || !email || !password || !confirmPassword) {
-            showMessage("Please fill in all fields!", "error");
-            return;
-        }
-        
-        if (password !== confirmPassword) {
-            showMessage("Passwords do not match!", "error");
-            return;
-        }
-        
-        if (password.length < 6) {
-            showMessage("Password must be at least 6 characters!", "error");
-            return;
-        }
-        
-        if (!agreeTerms) {
-            showMessage("You must agree to the terms and conditions!", "error");
-            return;
-        }
-        
-        // Show loading
-        const button = signupForm.querySelector('button[type="submit"]');
-        showLoading(button, "Creating Account...");
-        
-        // Use demo registration
-        const result = await demoRegister(role, fullName, phone, email, password);
-        
-        if (result.success) {
-            showMessage("Account created successfully! Redirecting to login...", "success");
-            setTimeout(function() {
-                window.location.href = 'index.html';
-            }, 2000);
+// Handle User Login
+async function handleUserLogin(e) {
+    e.preventDefault();
+    const studentId = document.getElementById('studentId').value;
+
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/users/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ studentId })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            currentUser = { studentId, isAdmin: false };
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            showUserView();
+            showMessage('user', 'Login successful!', 'success');
         } else {
-            showMessage(result.message || "Registration failed. Please try again.", "error");
-            hideLoading(button, "Create Account");
+            showMessage('user', data.error || 'Login failed', 'error');
         }
-    });
+    } catch (error) {
+        showMessage('user', 'Network error. Please try again.', 'error');
+    }
 }
 
-// Redirect to dashboard
-function redirectToDashboard(role) {
-    setTimeout(function() {
-        switch(role) {
-            case 'admin':
-                window.location.href = 'admin.html';
-                break;
-            case 'agent':
-                window.location.href = 'agent.html';
-                break;
-            case 'customer':
-                window.location.href = 'customer.html';
-                break;
-            default:
-                showMessage('Unknown role selected', 'error');
+// Handle Logout
+function handleLogout() {
+    currentUser = null;
+    isAdmin = false;
+    localStorage.removeItem('currentUser');
+    showPublicView();
+}
+
+// Check authentication state
+function checkAuthState() {
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        isAdmin = currentUser.isAdmin;
+        if (isAdmin) {
+            showAdminView();
+        } else {
+            showUserView();
         }
-    }, 1000);
-}
-
-// Show loading state
-function showLoading(button, text) {
-    button.innerHTML = text;
-    button.disabled = true;
-}
-
-// Hide loading state
-function hideLoading(button, text) {
-    button.innerHTML = text;
-    button.disabled = false;
-}
-
-// Show message to user
-function showMessage(message, type) {
-    // Create message element
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${type}`;
-    messageDiv.innerHTML = message;
-    
-    // Style the message
-    messageDiv.style.padding = '10px';
-    messageDiv.style.margin = '10px 0';
-    messageDiv.style.borderRadius = '5px';
-    messageDiv.style.textAlign = 'center';
-    messageDiv.style.fontWeight = 'bold';
-    
-    if (type === 'success') {
-        messageDiv.style.background = '#d4edda';
-        messageDiv.style.color = '#155724';
-        messageDiv.style.border = '1px solid #c3e6cb';
     } else {
-        messageDiv.style.background = '#f8d7da';
-        messageDiv.style.color = '#721c24';
-        messageDiv.style.border = '1px solid #f5c6cb';
+        showPublicView();
     }
+}
+
+// View management
+function showPublicView() {
+    adminPanel.style.display = 'none';
+    userPanel.style.display = 'none';
+    lockerGrid.style.display = 'grid';
+}
+
+function showAdminView() {
+    adminPanel.style.display = 'block';
+    userPanel.style.display = 'none';
+    lockerGrid.style.display = 'grid';
+    loadLockers();
+}
+
+function showUserView() {
+    adminPanel.style.display = 'none';
+    userPanel.style.display = 'block';
+    lockerGrid.style.display = 'grid';
+    loadLockers();
+}
+
+// Load lockers from backend
+async function loadLockers() {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/lockers`);
+        const data = await response.json();
+        
+        if (response.ok) {
+            lockers = data;
+            renderLockers();
+        } else {
+            throw new Error(data.error);
+        }
+    } catch (error) {
+        console.error('Error loading lockers:', error);
+        showMessage(isAdmin ? 'admin' : 'user', 'Failed to load lockers', 'error');
+    }
+}
+
+// Render lockers in the grid
+function renderLockers() {
+    lockerGrid.innerHTML = '';
     
-    // Add to page
-    const form = document.querySelector('form');
-    form.parentNode.insertBefore(messageDiv, form);
+    lockers.forEach(locker => {
+        const lockerElement = document.createElement('div');
+        lockerElement.className = `locker ${locker.status} ${locker.isOpen ? 'open' : ''}`;
+        lockerElement.innerHTML = `
+            <div class="locker-number">${locker.lockerNumber}</div>
+            <div class="locker-status">${getStatusText(locker.status)}</div>
+            ${locker.status === 'occupied' ? `<div class="locker-owner">${locker.currentUser}</div>` : ''}
+            ${isAdmin ? `<div class="admin-controls">
+                <button onclick="toggleLocker(${locker.lockerNumber})">${locker.isOpen ? 'Lock' : 'Unlock'}</button>
+                <button onclick="maintainLocker(${locker.lockerNumber})">Maintain</button>
+                <button onclick="releaseLocker(${locker.lockerNumber})">Release</button>
+            </div>` : ''}
+        `;
+        
+        // User can only interact with available lockers
+        if (!isAdmin && locker.status === 'available') {
+            lockerElement.classList.add('clickable');
+            lockerElement.onclick = () => requestLocker(locker.lockerNumber);
+        }
+        
+        lockerGrid.appendChild(lockerElement);
+    });
+}
+
+// Get status text
+function getStatusText(status) {
+    const statusMap = {
+        'available': 'Available',
+        'occupied': 'Occupied',
+        'maintenance': 'Maintenance'
+    };
+    return statusMap[status] || status;
+}
+
+// Admin functions
+async function toggleLocker(lockerNumber) {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/lockers/${lockerNumber}/toggle`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            await loadLockers();
+            showMessage('admin', `Locker ${lockerNumber} ${data.isOpen ? 'unlocked' : 'locked'}`, 'success');
+        } else {
+            showMessage('admin', data.error || 'Operation failed', 'error');
+        }
+    } catch (error) {
+        showMessage('admin', 'Network error. Please try again.', 'error');
+    }
+}
+
+async function maintainLocker(lockerNumber) {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/lockers/${lockerNumber}/maintain`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            await loadLockers();
+            showMessage('admin', `Locker ${lockerNumber} set to maintenance`, 'success');
+        } else {
+            showMessage('admin', data.error || 'Operation failed', 'error');
+        }
+    } catch (error) {
+        showMessage('admin', 'Network error. Please try again.', 'error');
+    }
+}
+
+async function releaseLocker(lockerNumber) {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/lockers/${lockerNumber}/release`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            await loadLockers();
+            showMessage('admin', `Locker ${lockerNumber} released`, 'success');
+        } else {
+            showMessage('admin', data.error || 'Operation failed', 'error');
+        }
+    } catch (error) {
+        showMessage('admin', 'Network error. Please try again.', 'error');
+    }
+}
+
+// User functions
+async function requestLocker(lockerNumber) {
+    if (!currentUser || isAdmin) return;
+
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/lockers/${lockerNumber}/occupy`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ studentId: currentUser.studentId })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            await loadLockers();
+            showMessage('user', `Locker ${lockerNumber} assigned to you!`, 'success');
+        } else {
+            showMessage('user', data.error || 'Failed to assign locker', 'error');
+        }
+    } catch (error) {
+        showMessage('user', 'Network error. Please try again.', 'error');
+    }
+}
+
+// Message display
+function showMessage(panel, text, type) {
+    const messageElement = panel === 'admin' ? adminMessage : userMessage;
+    messageElement.textContent = text;
+    messageElement.className = `message ${type}`;
+    messageElement.style.display = 'block';
     
-    // Remove after 3 seconds
-    setTimeout(function() {
-        messageDiv.remove();
+    setTimeout(() => {
+        messageElement.style.display = 'none';
     }, 3000);
 }
 
-// ==================== DEMO FUNCTIONS FOR PRESENTATION ====================
-
-// Demo login function - works without backend
-async function demoLogin(role, email, password) {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            // Accept any login for demo
-            if (email && password) {
-                resolve({
-                    success: true,
-                    data: {
-                        user_id: Math.floor(Math.random() * 1000),
-                        name: email.split('@')[0],
-                        role: role
-                    }
-                });
-            } else {
-                resolve({
-                    success: false,
-                    message: "Please enter email and password"
-                });
-            }
-        }, 1500);
-    });
-}
-
-// Demo register function - works without backend
-async function demoRegister(role, fullName, phone, email, password) {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve({
-                success: true,
-                message: "Account created successfully!"
-            });
-        }, 1500);
-    });
-}
-
-// Demo parcel deposit function
-async function demoDepositParcel(trackingNumber, recipientPhone, parcelSize) {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            const lockerSizes = {
-                'small': 'S',
-                'medium': 'M', 
-                'large': 'L',
-                'xlarge': 'XL'
-            };
-            
-            const sizeCode = lockerSizes[parcelSize] || 'M';
-            const lockerId = `LKR-${sizeCode}${Math.floor(Math.random() * 20) + 1}`;
-            const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-            
-            resolve({
-                success: true,
-                message: "Parcel deposited successfully! SMS sent to customer.",
-                locker_id: lockerId,
-                otp_code: otpCode,
-                sms_data: {
-                    to: recipientPhone,
-                    message: `📦 VUMA: Package #${trackingNumber} ready at ${lockerId}. OTP: ${otpCode}`,
-                    status: 'delivered'
-                }
-            });
-        }, 2000);
-    });
-}
-
-// Store user data in localStorage for demo
-function storeDemoUser(role, email) {
-    localStorage.setItem('currentUser', JSON.stringify({
-        id: Math.floor(Math.random() * 1000),
-        name: email.split('@')[0],
-        email: email,
-        role: role,
-        loginTime: new Date().toISOString()
-    }));
-}
-
-// ==================== BACKUP: ORIGINAL BACKEND FUNCTIONS ====================
-
-// Keep these for when you deploy backend later
-const API_BASE = 'https://vuma-lockers.app/api';
-async function loginToBackend(role, email, password) {
-    try {
-        const response = await fetch(`${API_BASE}/login.php`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                email: email,
-                password: password
-            })
-        });
-
-        const data = await response.json();
-        
-        if (data.success) {
-            localStorage.setItem('currentUser', JSON.stringify({
-                id: data.user_id,
-                name: data.name,
-                email: email,
-                role: data.role,
-                loginTime: new Date().toISOString()
-            }));
-            
-            return { success: true, data: data };
-        } else {
-            return { success: false, message: data.message };
-        }
-    } catch (error) {
-        console.error('Login error:', error);
-        return { success: false, message: 'Network error. Please try again.' };
-    }
-}
-
-async function registerToBackend(userData) {
-    try {
-        const response = await fetch(`${API_BASE}/register.php`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(userData)
-        });
-
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Registration error:', error);
-        return { success: false, message: 'Network error. Please try again.' };
-    }
-}
-
-
+// Initialize the app when DOM is loaded
+document.addEventListener('DOMContentLoaded', initApp);
