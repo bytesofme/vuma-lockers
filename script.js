@@ -67,10 +67,14 @@ async function handleAdminLogin(e) {
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
             showAdminView();
             showMessage('admin', 'Login successful!', 'success');
+            // Clear form
+            document.getElementById('adminUsername').value = '';
+            document.getElementById('adminPassword').value = '';
         } else {
             showMessage('admin', data.error || 'Login failed', 'error');
         }
     } catch (error) {
+        console.error('Login error:', error);
         showMessage('admin', 'Network error. Please try again.', 'error');
     }
 }
@@ -96,10 +100,13 @@ async function handleUserLogin(e) {
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
             showUserView();
             showMessage('user', 'Login successful!', 'success');
+            // Clear form
+            document.getElementById('studentId').value = '';
         } else {
             showMessage('user', data.error || 'Login failed', 'error');
         }
     } catch (error) {
+        console.error('Login error:', error);
         showMessage('user', 'Network error. Please try again.', 'error');
     }
 }
@@ -110,6 +117,7 @@ function handleLogout() {
     isAdmin = false;
     localStorage.removeItem('currentUser');
     showPublicView();
+    showMessage(isAdmin ? 'admin' : 'user', 'Logged out successfully', 'success');
 }
 
 // Check authentication state
@@ -133,12 +141,16 @@ function showPublicView() {
     adminPanel.style.display = 'none';
     userPanel.style.display = 'none';
     lockerGrid.style.display = 'grid';
+    // Reset login forms
+    adminLoginForm.style.display = 'none';
+    userLoginForm.style.display = 'none';
 }
 
 function showAdminView() {
     adminPanel.style.display = 'block';
     userPanel.style.display = 'none';
     lockerGrid.style.display = 'grid';
+    adminLoginForm.style.display = 'none';
     loadLockers();
 }
 
@@ -146,6 +158,7 @@ function showUserView() {
     adminPanel.style.display = 'none';
     userPanel.style.display = 'block';
     lockerGrid.style.display = 'grid';
+    userLoginForm.style.display = 'none';
     loadLockers();
 }
 
@@ -153,42 +166,58 @@ function showUserView() {
 async function loadLockers() {
     try {
         const response = await fetch(`${BACKEND_URL}/api/lockers`);
-        const data = await response.json();
         
-        if (response.ok) {
-            lockers = data;
-            renderLockers();
-        } else {
-            throw new Error(data.error);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+        
+        const data = await response.json();
+        lockers = data;
+        renderLockers();
+        
     } catch (error) {
         console.error('Error loading lockers:', error);
-        showMessage(isAdmin ? 'admin' : 'user', 'Failed to load lockers', 'error');
+        // Fallback to demo data if backend is down
+        lockers = Array.from({ length: 20 }, (_, i) => ({
+            locker_number: i + 1,
+            status: 'available',
+            is_open: false,
+            current_user_id: null
+        }));
+        renderLockers();
+        showMessage(isAdmin ? 'admin' : 'user', 'Using demo data - backend unavailable', 'error');
     }
 }
 
 // Render lockers in the grid
 function renderLockers() {
+    if (!lockerGrid) {
+        console.error('Locker grid element not found');
+        return;
+    }
+    
     lockerGrid.innerHTML = '';
     
     lockers.forEach(locker => {
         const lockerElement = document.createElement('div');
-        lockerElement.className = `locker ${locker.status} ${locker.isOpen ? 'open' : ''}`;
+        lockerElement.className = `locker ${locker.status} ${locker.is_open ? 'open' : ''}`;
         lockerElement.innerHTML = `
-            <div class="locker-number">${locker.lockerNumber}</div>
+            <div class="locker-number">${locker.locker_number}</div>
             <div class="locker-status">${getStatusText(locker.status)}</div>
-            ${locker.status === 'occupied' ? `<div class="locker-owner">${locker.currentUser}</div>` : ''}
-            ${isAdmin ? `<div class="admin-controls">
-                <button onclick="toggleLocker(${locker.lockerNumber})">${locker.isOpen ? 'Lock' : 'Unlock'}</button>
-                <button onclick="maintainLocker(${locker.lockerNumber})">Maintain</button>
-                <button onclick="releaseLocker(${locker.lockerNumber})">Release</button>
-            </div>` : ''}
+            ${locker.status === 'occupied' && locker.current_user_id ? `<div class="locker-owner">${locker.current_user_id}</div>` : ''}
+            ${isAdmin ? `
+            <div class="admin-controls">
+                <button onclick="toggleLocker(${locker.locker_number})" class="btn-toggle">${locker.is_open ? '🔒 Lock' : '🔓 Unlock'}</button>
+                <button onclick="maintainLocker(${locker.locker_number})" class="btn-maintain">🛠️ Maintain</button>
+                <button onclick="releaseLocker(${locker.locker_number})" class="btn-release">🔄 Release</button>
+            </div>
+            ` : ''}
         `;
         
         // User can only interact with available lockers
         if (!isAdmin && locker.status === 'available') {
             lockerElement.classList.add('clickable');
-            lockerElement.onclick = () => requestLocker(locker.lockerNumber);
+            lockerElement.onclick = () => requestLocker(locker.locker_number);
         }
         
         lockerGrid.appendChild(lockerElement);
@@ -215,16 +244,17 @@ async function toggleLocker(lockerNumber) {
             }
         });
 
-        const data = await response.json();
-
-        if (response.ok) {
-            await loadLockers();
-            showMessage('admin', `Locker ${lockerNumber} ${data.isOpen ? 'unlocked' : 'locked'}`, 'success');
-        } else {
-            showMessage('admin', data.error || 'Operation failed', 'error');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+
+        const data = await response.json();
+        await loadLockers();
+        showMessage('admin', `Locker ${lockerNumber} ${data.isOpen ? 'unlocked' : 'locked'}`, 'success');
+        
     } catch (error) {
-        showMessage('admin', 'Network error. Please try again.', 'error');
+        console.error('Toggle error:', error);
+        showMessage('admin', 'Failed to toggle locker', 'error');
     }
 }
 
@@ -237,16 +267,16 @@ async function maintainLocker(lockerNumber) {
             }
         });
 
-        const data = await response.json();
-
-        if (response.ok) {
-            await loadLockers();
-            showMessage('admin', `Locker ${lockerNumber} set to maintenance`, 'success');
-        } else {
-            showMessage('admin', data.error || 'Operation failed', 'error');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+
+        await loadLockers();
+        showMessage('admin', `Locker ${lockerNumber} set to maintenance`, 'success');
+        
     } catch (error) {
-        showMessage('admin', 'Network error. Please try again.', 'error');
+        console.error('Maintain error:', error);
+        showMessage('admin', 'Failed to set maintenance', 'error');
     }
 }
 
@@ -259,16 +289,16 @@ async function releaseLocker(lockerNumber) {
             }
         });
 
-        const data = await response.json();
-
-        if (response.ok) {
-            await loadLockers();
-            showMessage('admin', `Locker ${lockerNumber} released`, 'success');
-        } else {
-            showMessage('admin', data.error || 'Operation failed', 'error');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+
+        await loadLockers();
+        showMessage('admin', `Locker ${lockerNumber} released`, 'success');
+        
     } catch (error) {
-        showMessage('admin', 'Network error. Please try again.', 'error');
+        console.error('Release error:', error);
+        showMessage('admin', 'Failed to release locker', 'error');
     }
 }
 
@@ -285,30 +315,39 @@ async function requestLocker(lockerNumber) {
             body: JSON.stringify({ studentId: currentUser.studentId })
         });
 
-        const data = await response.json();
-
-        if (response.ok) {
-            await loadLockers();
-            showMessage('user', `Locker ${lockerNumber} assigned to you!`, 'success');
-        } else {
-            showMessage('user', data.error || 'Failed to assign locker', 'error');
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to assign locker');
         }
+
+        await loadLockers();
+        showMessage('user', `Locker ${lockerNumber} assigned to you!`, 'success');
+        
     } catch (error) {
-        showMessage('user', 'Network error. Please try again.', 'error');
+        console.error('Request locker error:', error);
+        showMessage('user', error.message || 'Failed to assign locker', 'error');
     }
 }
 
 // Message display
 function showMessage(panel, text, type) {
     const messageElement = panel === 'admin' ? adminMessage : userMessage;
-    messageElement.textContent = text;
-    messageElement.className = `message ${type}`;
-    messageElement.style.display = 'block';
-    
-    setTimeout(() => {
-        messageElement.style.display = 'none';
-    }, 3000);
+    if (messageElement) {
+        messageElement.textContent = text;
+        messageElement.className = `message ${type}`;
+        messageElement.style.display = 'block';
+        
+        setTimeout(() => {
+            messageElement.style.display = 'none';
+        }, 4000);
+    }
 }
+
+// Make functions globally available
+window.toggleLocker = toggleLocker;
+window.maintainLocker = maintainLocker;
+window.releaseLocker = releaseLocker;
+window.requestLocker = requestLocker;
 
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', initApp);
