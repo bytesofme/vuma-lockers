@@ -1,5 +1,15 @@
-// Configuration
-const BACKEND_URL = "https://vuma-lockers.up.railway.app";
+// Fully functional frontend-only version for Vuma Lockers
+const lockers = JSON.parse(localStorage.getItem('vumaLockers')) || Array.from({ length: 20 }, (_, i) => ({
+    locker_number: i + 1,
+    status: 'available',
+    is_open: false,
+    current_user_id: null
+}));
+
+// Save lockers to localStorage
+function saveLockers() {
+    localStorage.setItem('vumaLockers', JSON.stringify(lockers));
+}
 
 // DOM Elements
 const lockerGrid = document.getElementById('lockerGrid');
@@ -19,95 +29,67 @@ const userMessage = document.getElementById('userMessage');
 // State
 let currentUser = null;
 let isAdmin = false;
-let lockers = [];
 
 // Initialize the app
-async function initApp() {
-    await loadLockers();
+function initApp() {
+    console.log('🚀 Vuma Lockers Initialized');
+    loadLockers();
     checkAuthState();
     setupEventListeners();
 }
 
 // Event Listeners
 function setupEventListeners() {
-    adminLoginBtn.addEventListener('click', () => toggleLoginForm('admin'));
-    userLoginBtn.addEventListener('click', () => toggleLoginForm('user'));
-    adminLoginForm.addEventListener('submit', handleAdminLogin);
-    userLoginForm.addEventListener('submit', handleUserLogin);
-    logoutBtn.addEventListener('click', handleLogout);
-    userLogoutBtn.addEventListener('click', handleLogout);
+    if (adminLoginBtn) adminLoginBtn.addEventListener('click', () => toggleLoginForm('admin'));
+    if (userLoginBtn) userLoginBtn.addEventListener('click', () => toggleLoginForm('user'));
+    if (adminLoginForm) adminLoginForm.addEventListener('submit', handleAdminLogin);
+    if (userLoginForm) userLoginForm.addEventListener('submit', handleUserLogin);
+    if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
+    if (userLogoutBtn) userLogoutBtn.addEventListener('click', handleLogout);
 }
 
 // Toggle login forms
 function toggleLoginForm(type) {
-    adminLoginForm.style.display = type === 'admin' ? 'block' : 'none';
-    userLoginForm.style.display = type === 'user' ? 'block' : 'none';
+    if (adminLoginForm) adminLoginForm.style.display = type === 'admin' ? 'block' : 'none';
+    if (userLoginForm) userLoginForm.style.display = type === 'user' ? 'block' : 'none';
 }
 
 // Handle Admin Login
-async function handleAdminLogin(e) {
+function handleAdminLogin(e) {
     e.preventDefault();
     const username = document.getElementById('adminUsername').value;
     const password = document.getElementById('adminPassword').value;
 
-    try {
-        const response = await fetch(`${BACKEND_URL}/api/admin/login`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ username, password })
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            currentUser = { username, isAdmin: true };
-            isAdmin = true;
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            showAdminView();
-            showMessage('admin', 'Login successful!', 'success');
-            // Clear form
-            document.getElementById('adminUsername').value = '';
-            document.getElementById('adminPassword').value = '';
-        } else {
-            showMessage('admin', data.error || 'Login failed', 'error');
-        }
-    } catch (error) {
-        console.error('Login error:', error);
-        showMessage('admin', 'Network error. Please try again.', 'error');
+    // Simple admin validation
+    if (username === 'admin' && password === 'admin123') {
+        currentUser = { username, isAdmin: true };
+        isAdmin = true;
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        showAdminView();
+        showMessage('admin', 'Admin login successful!', 'success');
+        // Clear form
+        document.getElementById('adminUsername').value = '';
+        document.getElementById('adminPassword').value = '';
+    } else {
+        showMessage('admin', 'Invalid admin credentials', 'error');
     }
 }
 
 // Handle User Login
-async function handleUserLogin(e) {
+function handleUserLogin(e) {
     e.preventDefault();
     const studentId = document.getElementById('studentId').value;
 
-    try {
-        const response = await fetch(`${BACKEND_URL}/api/users/login`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ studentId })
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            currentUser = { studentId, isAdmin: false };
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            showUserView();
-            showMessage('user', 'Login successful!', 'success');
-            // Clear form
-            document.getElementById('studentId').value = '';
-        } else {
-            showMessage('user', data.error || 'Login failed', 'error');
-        }
-    } catch (error) {
-        console.error('Login error:', error);
-        showMessage('user', 'Network error. Please try again.', 'error');
+    // Simple student ID validation
+    if (studentId && studentId.length >= 3) {
+        currentUser = { studentId, isAdmin: false };
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        showUserView();
+        showMessage('user', `Welcome, Student ${studentId}!`, 'success');
+        // Clear form
+        document.getElementById('studentId').value = '';
+    } else {
+        showMessage('user', 'Please enter a valid student ID (min 3 characters)', 'error');
     }
 }
 
@@ -117,7 +99,7 @@ function handleLogout() {
     isAdmin = false;
     localStorage.removeItem('currentUser');
     showPublicView();
-    showMessage(isAdmin ? 'admin' : 'user', 'Logged out successfully', 'success');
+    showMessage('admin', 'Logged out successfully', 'success');
 }
 
 // Check authentication state
@@ -138,55 +120,33 @@ function checkAuthState() {
 
 // View management
 function showPublicView() {
-    adminPanel.style.display = 'none';
-    userPanel.style.display = 'none';
-    lockerGrid.style.display = 'grid';
+    if (adminPanel) adminPanel.style.display = 'none';
+    if (userPanel) userPanel.style.display = 'none';
+    if (lockerGrid) lockerGrid.style.display = 'grid';
     // Reset login forms
-    adminLoginForm.style.display = 'none';
-    userLoginForm.style.display = 'none';
+    if (adminLoginForm) adminLoginForm.style.display = 'none';
+    if (userLoginForm) userLoginForm.style.display = 'none';
 }
 
 function showAdminView() {
-    adminPanel.style.display = 'block';
-    userPanel.style.display = 'none';
-    lockerGrid.style.display = 'grid';
-    adminLoginForm.style.display = 'none';
+    if (adminPanel) adminPanel.style.display = 'block';
+    if (userPanel) userPanel.style.display = 'none';
+    if (lockerGrid) lockerGrid.style.display = 'grid';
+    if (adminLoginForm) adminLoginForm.style.display = 'none';
     loadLockers();
 }
 
 function showUserView() {
-    adminPanel.style.display = 'none';
-    userPanel.style.display = 'block';
-    lockerGrid.style.display = 'grid';
-    userLoginForm.style.display = 'none';
+    if (adminPanel) adminPanel.style.display = 'none';
+    if (userPanel) userPanel.style.display = 'block';
+    if (lockerGrid) lockerGrid.style.display = 'grid';
+    if (userLoginForm) userLoginForm.style.display = 'none';
     loadLockers();
 }
 
-// Load lockers from backend
-async function loadLockers() {
-    try {
-        const response = await fetch(`${BACKEND_URL}/api/lockers`);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        lockers = data;
-        renderLockers();
-        
-    } catch (error) {
-        console.error('Error loading lockers:', error);
-        // Fallback to demo data if backend is down
-        lockers = Array.from({ length: 20 }, (_, i) => ({
-            locker_number: i + 1,
-            status: 'available',
-            is_open: false,
-            current_user_id: null
-        }));
-        renderLockers();
-        showMessage(isAdmin ? 'admin' : 'user', 'Using demo data - backend unavailable', 'error');
-    }
+// Load lockers
+function loadLockers() {
+    renderLockers();
 }
 
 // Render lockers in the grid
@@ -201,17 +161,24 @@ function renderLockers() {
     lockers.forEach(locker => {
         const lockerElement = document.createElement('div');
         lockerElement.className = `locker ${locker.status} ${locker.is_open ? 'open' : ''}`;
-        lockerElement.innerHTML = `
-            <div class="locker-number">${locker.locker_number}</div>
-            <div class="locker-status">${getStatusText(locker.status)}</div>
-            ${locker.status === 'occupied' && locker.current_user_id ? `<div class="locker-owner">${locker.current_user_id}</div>` : ''}
-            ${isAdmin ? `
+        
+        let adminControls = '';
+        if (isAdmin) {
+            adminControls = `
             <div class="admin-controls">
                 <button onclick="toggleLocker(${locker.locker_number})" class="btn-toggle">${locker.is_open ? '🔒 Lock' : '🔓 Unlock'}</button>
                 <button onclick="maintainLocker(${locker.locker_number})" class="btn-maintain">🛠️ Maintain</button>
                 <button onclick="releaseLocker(${locker.locker_number})" class="btn-release">🔄 Release</button>
             </div>
-            ` : ''}
+            `;
+        }
+        
+        lockerElement.innerHTML = `
+            <div class="locker-number">Locker ${locker.locker_number}</div>
+            <div class="locker-status">${getStatusText(locker.status)}</div>
+            ${locker.status === 'occupied' && locker.current_user_id ? `<div class="locker-owner">Student: ${locker.current_user_id}</div>` : ''}
+            ${locker.is_open ? '<div class="locker-open">🔓 OPEN</div>' : ''}
+            ${adminControls}
         `;
         
         // User can only interact with available lockers
@@ -227,111 +194,74 @@ function renderLockers() {
 // Get status text
 function getStatusText(status) {
     const statusMap = {
-        'available': 'Available',
-        'occupied': 'Occupied',
-        'maintenance': 'Maintenance'
+        'available': '🟢 Available',
+        'occupied': '🔴 Occupied', 
+        'maintenance': '🟡 Maintenance'
     };
     return statusMap[status] || status;
 }
 
 // Admin functions
-async function toggleLocker(lockerNumber) {
-    try {
-        const response = await fetch(`${BACKEND_URL}/api/lockers/${lockerNumber}/toggle`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        await loadLockers();
-        showMessage('admin', `Locker ${lockerNumber} ${data.isOpen ? 'unlocked' : 'locked'}`, 'success');
-        
-    } catch (error) {
-        console.error('Toggle error:', error);
-        showMessage('admin', 'Failed to toggle locker', 'error');
+function toggleLocker(lockerNumber) {
+    const locker = lockers.find(l => l.locker_number === lockerNumber);
+    if (locker) {
+        locker.is_open = !locker.is_open;
+        saveLockers();
+        loadLockers();
+        showMessage('admin', `Locker ${lockerNumber} ${locker.is_open ? 'unlocked 🔓' : 'locked 🔒'}`, 'success');
     }
 }
 
-async function maintainLocker(lockerNumber) {
-    try {
-        const response = await fetch(`${BACKEND_URL}/api/lockers/${lockerNumber}/maintain`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        await loadLockers();
-        showMessage('admin', `Locker ${lockerNumber} set to maintenance`, 'success');
-        
-    } catch (error) {
-        console.error('Maintain error:', error);
-        showMessage('admin', 'Failed to set maintenance', 'error');
+function maintainLocker(lockerNumber) {
+    const locker = lockers.find(l => l.locker_number === lockerNumber);
+    if (locker) {
+        locker.status = 'maintenance';
+        locker.current_user_id = null;
+        locker.is_open = false;
+        saveLockers();
+        loadLockers();
+        showMessage('admin', `Locker ${lockerNumber} set to maintenance 🛠️`, 'success');
     }
 }
 
-async function releaseLocker(lockerNumber) {
-    try {
-        const response = await fetch(`${BACKEND_URL}/api/lockers/${lockerNumber}/release`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        await loadLockers();
-        showMessage('admin', `Locker ${lockerNumber} released`, 'success');
-        
-    } catch (error) {
-        console.error('Release error:', error);
-        showMessage('admin', 'Failed to release locker', 'error');
+function releaseLocker(lockerNumber) {
+    const locker = lockers.find(l => l.locker_number === lockerNumber);
+    if (locker) {
+        locker.status = 'available';
+        locker.current_user_id = null;
+        locker.is_open = false;
+        saveLockers();
+        loadLockers();
+        showMessage('admin', `Locker ${lockerNumber} released and available 🔄`, 'success');
     }
 }
 
 // User functions
-async function requestLocker(lockerNumber) {
+function requestLocker(lockerNumber) {
     if (!currentUser || isAdmin) return;
 
-    try {
-        const response = await fetch(`${BACKEND_URL}/api/lockers/${lockerNumber}/occupy`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ studentId: currentUser.studentId })
-        });
-
-        if (!response.ok) {
-            const data = await response.json();
-            throw new Error(data.error || 'Failed to assign locker');
-        }
-
-        await loadLockers();
-        showMessage('user', `Locker ${lockerNumber} assigned to you!`, 'success');
-        
-    } catch (error) {
-        console.error('Request locker error:', error);
-        showMessage('user', error.message || 'Failed to assign locker', 'error');
+    const locker = lockers.find(l => l.locker_number === lockerNumber);
+    if (locker && locker.status === 'available') {
+        locker.status = 'occupied';
+        locker.current_user_id = currentUser.studentId;
+        locker.is_open = true; // Auto-unlock when assigned
+        saveLockers();
+        loadLockers();
+        showMessage('user', `🎉 Locker ${lockerNumber} assigned to you! It's now unlocked.`, 'success');
+    } else {
+        showMessage('user', '❌ Locker is not available', 'error');
     }
 }
 
 // Message display
 function showMessage(panel, text, type) {
-    const messageElement = panel === 'admin' ? adminMessage : userMessage;
+    let messageElement;
+    if (panel === 'admin') {
+        messageElement = adminMessage;
+    } else {
+        messageElement = userMessage;
+    }
+    
     if (messageElement) {
         messageElement.textContent = text;
         messageElement.className = `message ${type}`;
@@ -340,6 +270,9 @@ function showMessage(panel, text, type) {
         setTimeout(() => {
             messageElement.style.display = 'none';
         }, 4000);
+    } else {
+        // Fallback alert if message element not found
+        alert(text);
     }
 }
 
@@ -350,4 +283,8 @@ window.releaseLocker = releaseLocker;
 window.requestLocker = requestLocker;
 
 // Initialize the app when DOM is loaded
-document.addEventListener('DOMContentLoaded', initApp);
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}
