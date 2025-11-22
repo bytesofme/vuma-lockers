@@ -3,194 +3,290 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Vuma Lockers</title>
+    <title>Vuma Lockers - Smart Locker Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        .hero-background {
-            background: linear-gradient(135deg, rgba(37, 99, 235, 0.9), rgba(124, 58, 237, 0.9)),
-                        url('https://images.unsplash.com/photo-1565689228863-61e24e0e50b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'),
-                        linear-gradient(135deg, #667eea, #764ba2);
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+        .locker {
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: white;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         
-        /* Fallback if image doesn't load */
-        .hero-background {
-            background: linear-gradient(135deg, rgba(37, 99, 235, 0.9), rgba(124, 58, 237, 0.9)),
-                        linear-gradient(135deg, #667eea, #764ba2);
+        .locker.available {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+        
+        .locker.occupied {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+        
+        .locker.maintenance {
+            border-color: #f59e0b;
+            background: #fffbeb;
+        }
+        
+        .locker.open {
+            border-color: #3b82f6;
+            background: #eff6ff;
+            box-shadow: 0 0 0 2px #3b82f6;
+        }
+        
+        .locker.clickable {
+            cursor: pointer;
+        }
+        
+        .locker.clickable:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 12px 0;
+            font-weight: 500;
+            display: none;
+        }
+        
+        .message.success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        
+        .admin-controls {
+            margin-top: 8px;
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .admin-controls button {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+        }
+        
+        .btn-toggle { background: #3b82f6; color: white; }
+        .btn-maintain { background: #f59e0b; color: white; }
+        .btn-release { background: #ef4444; color: white; }
+        
+        .admin-controls button:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+        
+        .locker-number {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .locker-status {
+            font-size: 0.875rem;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+        
+        .locker-owner {
+            font-size: 0.75rem;
+            color: #6b7280;
+            font-style: italic;
+        }
+        
+        .locker-open {
+            font-size: 0.75rem;
+            color: #3b82f6;
+            font-weight: bold;
+            margin-top: 4px;
         }
     </style>
 </head>
-<body class="min-h-screen">
-    <!-- Hero Section with Background -->
-    <div class="hero-background min-h-screen flex items-center justify-center p-6">
-        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-4xl w-full">
-            <div class="md:flex">
-                <!-- Left Side - Branding -->
-                <div class="md:w-1/2 bg-gradient-to-br from-blue-600 to-blue-800 text-white p-8 md:p-12">
-                    <div class="flex items-center space-x-3 mb-6">
-                        <div class="bg-white/20 p-3 rounded-xl">
-                            <i class="fas fa-lock text-2xl"></i>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold">Vuma Lockers</h1>
-                            <p class="text-blue-200 text-sm">Eldoret's Smart Delivery</p>
-                        </div>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-blue-600 p-2 rounded-lg">
+                        <i class="fas fa-lock text-white text-xl"></i>
                     </div>
-                    
-                    <h2 class="text-3xl font-bold mb-4">Secure Parcel Delivery</h2>
-                    <p class="text-blue-100 mb-8 leading-relaxed">
-                        Revolutionizing package management with automated locker solutions. 
-                        Safe, convenient, and available 24/7 for all your delivery needs.
-                    </p>
-                    
-                    <!-- Features -->
-                    <div class="space-y-4 mb-8">
-                        <div class="flex items-center space-x-3 bg-white/10 rounded-lg p-3">
-                            <i class="fas fa-shield-alt text-green-300"></i>
-                            <span class="text-blue-100">Military-grade security</span>
-                        </div>
-                        <div class="flex items-center space-x-3 bg-white/10 rounded-lg p-3">
-                            <i class="fas fa-bolt text-yellow-300"></i>
-                            <span class="text-blue-100">Instant SMS notifications</span>
-                        </div>
-                        <div class="flex items-center space-x-3 bg-white/10 rounded-lg p-3">
-                            <i class="fas fa-clock text-blue-200"></i>
-                            <span class="text-blue-100">24/7 access to lockers</span>
-                        </div>
-                    </div>
-
-                    <!-- Stats -->
-                    <div class="grid grid-cols-3 gap-4 text-center">
-                        <div>
-                            <div class="text-2xl font-bold text-white">5,000+</div>
-                            <div class="text-blue-200 text-xs">Deliveries</div>
-                        </div>
-                        <div>
-                            <div class="text-2xl font-bold text-white">98%</div>
-                            <div class="text-blue-200 text-xs">Satisfaction</div>
-                        </div>
-                        <div>
-                            <div class="text-2xl font-bold text-white">24/7</div>
-                            <div class="text-blue-200 text-xs">Available</div>
-                        </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">Vuma Lockers</h1>
+                        <p class="text-gray-600 text-sm">Smart Locker Management System</p>
                     </div>
                 </div>
-
-                <!-- Right Side - Login Form -->
-                <div class="md:w-1/2 p-8 md:p-12">
-                    <div class="text-center mb-8">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Welcome Back</h2>
-                        <p class="text-gray-600">Sign in to access your dashboard</p>
+                
+                <!-- Public View - Login Buttons -->
+                <div class="flex space-x-3" id="publicView">
+                    <button id="adminLoginBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors shadow-md">
+                        <i class="fas fa-cog mr-2"></i>Admin Login
+                    </button>
+                    <button id="userLoginBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors shadow-md">
+                        <i class="fas fa-user mr-2"></i>Student Login
+                    </button>
+                </div>
+                
+                <!-- Admin Panel (hidden by default) -->
+                <div id="adminPanel" style="display: none;" class="flex items-center space-x-4">
+                    <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+                        <i class="fas fa-crown mr-1"></i>Administrator
                     </div>
-
-                    <form id="loginForm">
-                        <!-- Role Selection -->
-                        <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-3">Select Your Role</label>
-                            <div class="grid grid-cols-3 gap-3">
-                                <div class="role-option border-2 border-gray-200 rounded-xl p-3 text-center cursor-pointer transition-all duration-200 hover:border-blue-500 hover:shadow-md" data-role="customer">
-                                    <i class="fas fa-user text-blue-600 text-lg mb-2"></i>
-                                    <div class="text-xs font-semibold text-gray-700">Customer</div>
-                                </div>
-                                <div class="role-option border-2 border-gray-200 rounded-xl p-3 text-center cursor-pointer transition-all duration-200 hover:border-blue-500 hover:shadow-md" data-role="agent">
-                                    <i class="fas fa-truck text-blue-600 text-lg mb-2"></i>
-                                    <div class="text-xs font-semibold text-gray-700">Agent</div>
-                                </div>
-                                <div class="role-option border-2 border-gray-200 rounded-xl p-3 text-center cursor-pointer transition-all duration-200 hover:border-blue-500 hover:shadow-md" data-role="admin">
-                                    <i class="fas fa-cog text-blue-600 text-lg mb-2"></i>
-                                    <div class="text-xs font-semibold text-gray-700">Admin</div>
-                                </div>
-                            </div>
-                            <input type="hidden" id="userRole" name="userRole" required>
-                        </div>
-
-                        <!-- Email -->
-                        <div class="mb-4">
-                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                            <div class="relative">
-                                <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                                <input type="email" id="email" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" placeholder="Enter your email" required>
-                            </div>
-                        </div>
-
-                        <!-- Password -->
-                        <div class="mb-6">
-                            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                            <div class="relative">
-                                <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                                <input type="password" id="password" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" placeholder="Enter your password" required>
-                            </div>
-                        </div>
-
-                        <!-- Login Button -->
-                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mb-4 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-                            <i class="fas fa-sign-in-alt mr-2"></i>Sign In to Dashboard
-                        </button>
-
-                        <!-- Demo Accounts -->
-                        <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2 text-center">Quick Demo Access</label>
-                            <div class="grid grid-cols-3 gap-2">
-                                <button type="button" onclick="fillDemo('admin')" class="bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg py-2 text-xs font-medium text-gray-700 transition-all hover:shadow-md">Admin</button>
-                                <button type="button" onclick="fillDemo('agent')" class="bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg py-2 text-xs font-medium text-gray-700 transition-all hover:shadow-md">Agent</button>
-                                <button type="button" onclick="fillDemo('customer')" class="bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg py-2 text-xs font-medium text-gray-700 transition-all hover:shadow-md">Customer</button>
-                            </div>
-                        </div>
-
-                        <!-- Signup Link -->
-                        <div class="text-center pt-4 border-t border-gray-200">
-                            <p class="text-gray-600 text-sm">
-                                New to Vuma Lockers? 
-                                <a href="signup.html" class="text-blue-600 hover:text-blue-700 font-semibold transition-colors">Create account</a>
-                            </p>
-                        </div>
-                    </form>
+                    <button id="logoutBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </button>
+                </div>
+                
+                <!-- User Panel (hidden by default) -->
+                <div id="userPanel" style="display: none;" class="flex items-center space-x-4">
+                    <div class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
+                        <i class="fas fa-user-graduate mr-1"></i>Student
+                    </div>
+                    <button id="userLogoutBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </button>
                 </div>
             </div>
         </div>
-    </div>
+    </header>
 
-    <script src="/script.js"></script>
-    <script>
-        // Role Selection
-        document.querySelectorAll('.role-option').forEach(option => {
-            option.addEventListener('click', function() {
-                document.querySelectorAll('.role-option').forEach(opt => {
-                    opt.classList.remove('border-blue-500', 'bg-blue-50', 'shadow-md');
-                });
-                this.classList.add('border-blue-500', 'bg-blue-50', 'shadow-md');
-                document.getElementById('userRole').value = this.dataset.role;
-            });
-        });
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Admin Login Form -->
+        <div id="adminLoginForm" style="display: none;" class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md mb-8 border border-gray-200">
+            <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-cog text-blue-600 mr-2"></i>Admin Login
+            </h2>
+            <form id="adminLoginFormElement">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                    <input type="text" id="adminUsername" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
+                           placeholder="Enter admin username" value="admin" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <input type="password" id="adminPassword" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" 
+                           placeholder="Enter password" value="admin123" required>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-semibold transition-colors shadow-md">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Login as Admin
+                </button>
+            </form>
+            <div id="adminMessage" class="message" style="display: none;"></div>
+        </div>
 
-        // Demo account filler
-        function fillDemo(role) {
-            const credentials = {
-                'admin': { email: 'admin@vuma.com', password: 'admin123' },
-                'agent': { email: 'agent@vuma.com', password: 'agent123' },
-                'customer': { email: 'customer@vuma.com', password: 'customer123' }
-            };
-            
-            const cred = credentials[role];
-            document.getElementById('email').value = cred.email;
-            document.getElementById('password').value = cred.password;
-            
-            document.querySelectorAll('.role-option').forEach(opt => {
-                opt.classList.remove('border-blue-500', 'bg-blue-50', 'shadow-md');
-                if (opt.dataset.role === role) {
-                    opt.classList.add('border-blue-500', 'bg-blue-50', 'shadow-md');
-                    document.getElementById('userRole').value = role;
-                }
-            });
-        }
+        <!-- User Login Form -->
+        <div id="userLoginForm" style="display: none;" class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md mb-8 border border-gray-200">
+            <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-user-graduate text-green-600 mr-2"></i>Student Login
+            </h2>
+            <form id="userLoginFormElement">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Student ID</label>
+                    <input type="text" id="studentId" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors" 
+                           placeholder="Enter your student ID" value="STU2024001" required>
+                </div>
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-semibold transition-colors shadow-md">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Login as Student
+                </button>
+            </form>
+            <div id="userMessage" class="message" style="display: none;"></div>
+        </div>
 
-        // Auto-select first role
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelector('.role-option').click();
-        });
-    </script>
+        <!-- System Title -->
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">Locker Management System</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">Manage and monitor all locker stations in real-time. Assign lockers to students, control access, and maintain security.</p>
+        </div>
+
+        <!-- Locker Grid -->
+        <div id="lockerGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-12">
+            <!-- Lockers will be dynamically inserted here by JavaScript -->
+        </div>
+
+        <!-- Demo Instructions -->
+        <div class="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 max-w-4xl mx-auto">
+            <h3 class="text-xl font-semibold text-blue-900 mb-4 flex items-center">
+                <i class="fas fa-info-circle mr-2"></i>Demo Instructions
+            </h3>
+            <div class="grid md:grid-cols-2 gap-6 text-sm">
+                <div class="space-y-3">
+                    <div class="flex items-start space-x-3">
+                        <div class="bg-blue-600 text-white p-1 rounded mt-0.5">
+                            <i class="fas fa-cog text-xs"></i>
+                        </div>
+                        <div>
+                            <strong class="text-blue-900">Admin Access:</strong>
+                            <p class="text-blue-800">Click "Admin Login" → Username: <code class="bg-blue-100 px-1 rounded">admin</code>, Password: <code class="bg-blue-100 px-1 rounded">admin123</code></p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <div class="bg-green-600 text-white p-1 rounded mt-0.5">
+                            <i class="fas fa-user text-xs"></i>
+                        </div>
+                        <div>
+                            <strong class="text-green-900">Student Access:</strong>
+                            <p class="text-green-800">Click "Student Login" → Enter any student ID (min 3 characters)</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex items-start space-x-3">
+                        <div class="bg-purple-600 text-white p-1 rounded mt-0.5">
+                            <i class="fas fa-star text-xs"></i>
+                        </div>
+                        <div>
+                            <strong class="text-purple-900">Admin Features:</strong>
+                            <p class="text-purple-800">Toggle locks, set maintenance, release lockers, monitor all lockers</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <div class="bg-orange-600 text-white p-1 rounded mt-0.5">
+                            <i class="fas fa-lock text-xs"></i>
+                        </div>
+                        <div>
+                            <strong class="text-orange-900">Student Features:</strong>
+                            <p class="text-orange-800">Request available lockers, view assigned lockers</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="text-center text-gray-600">
+                <p class="flex items-center justify-center space-x-2">
+                    <i class="fas fa-heart text-red-500"></i>
+                    <span>&copy; 2024 Vuma Lockers. Smart Locker Management System.</span>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
 </body>
 </html>
