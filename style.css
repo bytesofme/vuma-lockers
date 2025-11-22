@@ -1,4 +1,108 @@
-/* ===== MODERN VUMA LOCKERS DESIGN SYSTEM ===== */
+/* Enhanced Vuma Lockers Styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+* {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Smooth transitions for all interactive elements */
+.locker, button, input, .message {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced locker hover effects */
+.locker.clickable:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Loading animation */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #ffffff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Pulse animation for new assignments */
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 5px rgba(34, 197, 94, 0.5); }
+    50% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.8); }
+}
+
+.locker.recently-assigned {
+    animation: pulse-glow 2s ease-in-out;
+}
+
+/* Status indicators */
+.status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+}
+
+.status-available { background: #10b981; }
+.status-occupied { background: #ef4444; }
+.status-maintenance { background: #f59e0b; }
+
+/* Enhanced buttons */
+.btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200;
+}
+
+.btn-success {
+    @apply bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200;
+}
+
+.btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200;
+}
+
+/* Statistics cards */
+.stats-card {
+    @apply bg-white rounded-xl shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow duration-200;
+}
+
+/* Responsive improvements */
+@media (max-width: 640px) {
+    .locker {
+        min-height: 120px;
+        padding: 12px;
+    }
+    
+    .admin-controls {
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .admin-controls button {
+        font-size: 10px;
+        padding: 3px 6px;
+    }
+}
+
+/* Print styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .locker {
+        break-inside: avoid;
+        border: 2px solid #000 !important;
+        background: white !important;
+        color: black !important;
+    }
+}/* ===== MODERN VUMA LOCKERS DESIGN SYSTEM ===== */
 :root {
     --primary: #2563eb;
     --primary-dark: #1d4ed8;
@@ -365,3 +469,4 @@ body {
 
 .p-3 { padding: 1.5rem; }
 .p-4 { padding: 2rem; }
+
