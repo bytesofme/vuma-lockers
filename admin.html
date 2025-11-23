@@ -1,47 +1,55 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard | Parcel Locker System</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin — Vuma Parcel Lockers</title>
+  <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
-  <div class="navbar">
-    <h2>Admin Dashboard</h2>
-    <div class="nav-links">
-      <a href="#">Dashboard</a>
-      <a href="#">Manage Users</a>
-      <a href="#">Lockers</a>
-      <a href="#">Generate OTP</a>
-      <a href="./index.html" id="logout">Logout</a>
+  <header class="topbar">
+    <div class="brand">Vuma Parcel Lockers — Admin</div>
+    <div class="top-actions">
+      <span id="adminWelcome" class="muted">Hello</span>
+      <button class="btn" id="logoutBtn">Logout</button>
     </div>
-  </div>
+  </header>
 
-  <div class="dashboard">
-    <h3>System Overview</h3>
-    <div class="card-grid">
-      <div class="card">
-        <h4>Total Parcels</h4>
-        <p>142</p>
-      </div>
-      <div class="card">
-        <h4>Active Lockers</h4>
-        <p>37</p>
-      </div>
-      <div class="card">
-        <h4>Pending Pickups</h4>
-        <p>19</p>
-      </div>
-      <div class="card">
-        <h4>System Health</h4>
-        <p>✅ Running</p>
-      </div>
-    </div>
-  </div>
+  <main class="container">
+    <section class="stats-row">
+      <div class="stat card small-card"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Total Parcels</div></div>
+      <div class="stat card small-card"><div class="stat-num" id="statPending">0</div><div class="stat-label">Pending</div></div>
+      <div class="stat card small-card"><div class="stat-num" id="statPicked">0</div><div class="stat-label">Picked Up</div></div>
+      <div class="stat card small-card"><div class="stat-num" id="statLockers">0</div><div class="stat-label">Lockers</div></div>
+    </section>
 
-  <footer>
-    <p>© 2025 Vuma Parcel Locker System | Admin Panel</p>
-  </footer>
+    <section class="panel">
+      <h2>Register Parcel (Agent/Manual)</h2>
+      <form id="addParcelForm" class="inline">
+        <input id="parcelRecipient" placeholder="Recipient name" required />
+        <input id="parcelEmail" type="email" placeholder="recipient@example.com" required />
+        <input id="parcelPhone" placeholder="Phone" />
+        <select id="parcelSize">
+          <option value="small">Small</option>
+          <option value="medium">Medium</option>
+          <option value="large">Large</option>
+        </select>
+        <button class="btn" type="submit">Add Parcel</button>
+      </form>
+
+      <h3>All Parcels</h3>
+      <table class="table" id="parcelsTable">
+        <thead><tr><th>ID</th><th>Recipient</th><th>Locker</th><th>Status</th><th>OTP</th><th>Actions</th></tr></thead>
+        <tbody id="parcelsBody"></tbody>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>Lockers</h2>
+      <div id="lockersGrid" class="grid-lockers"></div>
+    </section>
+  </main>
+
+  <script src="./script.js" defer></script>
 </body>
 </html>
