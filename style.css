@@ -1,107 +1,49 @@
-body {
-  font-family: Poppins, sans-serif;
-  background: #eef2f3;
-  margin: 0;
-  padding: 0;
+:root{
+  --bg:#f4f7fb;
+  --card:#ffffff;
+  --accent:#1f6feb;
+  --muted:#6b7280;
+  --success:#16a34a;
+  --danger:#ef4444;
+  --shadow: 0 6px 20px rgba(31,99,255,0.08);
+  --radius:10px;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 }
-
-.container {
-  max-width: 400px;
-  margin: 80px auto;
-  background: white;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-h2 {
-  text-align: center;
-  color: #1d3557;
-}
-
-.form label {
-  display: block;
-  margin-top: 10px;
-  color: #333;
-}
-
-input {
-  width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-}
-
-.btn {
-  width: 100%;
-  background: #457b9d;
-  color: white;
-  border: none;
-  margin-top: 15px;
-  padding: 10px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.btn:hover {
-  background: #1d3557;
-}
-
-.small {
-  text-align: center;
-  margin-top: 15px;
-}
-
-.hint {
-  color: #e63946;
-  font-size: 14px;
-  margin-top: 5px;
-}
-
-.navbar {
-  background: #1d3557;
-  color: white;
-  padding: 15px 25px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.nav-links a {
-  color: white;
-  margin-left: 20px;
-  text-decoration: none;
-}
-
-.nav-links a:hover {
-  text-decoration: underline;
-}
-
-.dashboard {
-  padding: 25px;
-}
-
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-}
-
-.card {
-  background: white;
-  border-radius: 10px;
-  padding: 20px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-  text-align: center;
-}
-
-footer {
-  text-align: center;
-  padding: 20px;
-  background: #f1f1f1;
-  color: #333;
-  position: fixed;
-  width: 100%;
-  bottom: 0;
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);color:#0f172a}
+.centered{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+.auth-card{width:100%;max-width:420px;text-align:left}
+h1{margin:0 0 6px;font-size:20px}
+.muted{color:var(--muted);font-size:13px}
+.small{font-size:13px}
+.spaced>label{display:block;margin-top:12px;font-weight:600;font-size:13px}
+.spaced input, .spaced select {width:100%;padding:10px;border-radius:8px;border:1px solid #e6eefb;margin-top:6px}
+.btn{background:transparent;border:1px solid #e2e8f0;padding:10px 12px;border-radius:8px;cursor:pointer}
+.btn.primary{background:var(--accent);color:white;border:0}
+.row{display:flex;gap:8px;align-items:center;margin-top:12px}
+.hint{color:var(--danger);min-height:18px;margin-top:6px}
+.container{max-width:1100px;margin:28px auto;padding:18px}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 22px;background:linear-gradient(90deg,var(--accent),#3b82f6);color:#fff}
+.top-actions{display:flex;gap:8px;align-items:center}
+.stats-row{display:flex;gap:12px;margin-bottom:18px}
+.small-card{flex:1;padding:14px;text-align:center}
+.stat-num{font-size:20px;font-weight:700}
+.stat-label{font-size:13px;color:var(--muted)}
+.inline{display:flex;gap:8px;flex-wrap:wrap}
+.inline input, .inline select{padding:8px;border-radius:8px;border:1px solid #e6eefb}
+.table{width:100%;border-collapse:collapse;margin-top:12px;background:var(--card);border-radius:8px;overflow:hidden}
+.table th, .table td{padding:10px 12px;border-bottom:1px solid #f1f5f9;text-align:left}
+.table thead th{background:#f8fafc;color:#0f172a}
+.panel{margin-top:18px}
+.grid-lockers{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.locker{padding:12px;border-radius:8px;text-align:center;background:#fff;box-shadow:0 6px 18px rgba(15,23,42,0.04)}
+.locker.available{border:2px dashed #10b981}
+.locker.occupied{border:2px solid #ef4444}
+.locker.maintenance{border:2px dashed #f59e0b}
+.muted.small{color:var(--muted)}
+.demo-cred{margin-top:12px;background:#fff;padding:10px;border-radius:8px;font-size:13px}
+@media(max-width:700px){
+  .inline{flex-direction:column}
+  .stats-row{flex-direction:column}
 }
