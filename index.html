@@ -1,29 +1,39 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login | Parcel Locker System</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Vuma Parcel Lockers — Login</title>
+  <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
-  <div class="container">
-    <h2>Parcel Locker System</h2>
+  <main class="centered">
+    <div class="card auth-card">
+      <h1>Vuma Parcel Lockers</h1>
+      <p class="muted">Secure locker pickup system — Admin, Agent, Customer</p>
 
-    <form id="loginForm" class="form">
-      <label>Email</label>
-      <input type="email" id="loginEmail" placeholder="you@example.com" required />
+      <form id="loginForm" class="spaced">
+        <label>Email</label>
+        <input id="loginEmail" type="email" placeholder="you@example.com" required />
+        <label>Password</label>
+        <input id="loginPassword" type="password" placeholder="password" required />
+        <div id="loginError" class="hint"></div>
+        <button class="btn primary" type="submit">Login</button>
+      </form>
 
-      <label>Password</label>
-      <input type="password" id="loginPassword" placeholder="Enter password" required />
+      <div class="row small">
+        <span>Don't have an account?</span> <a href="./signup.html">Sign up</a>
+      </div>
 
-      <div id="loginError" class="hint"></div>
-      <button type="submit" class="btn">Login</button>
-    </form>
+      <div class="demo-cred">
+        <strong>Demo logins:</strong>
+        <div>admin@vuma.com / admin123</div>
+        <div>agent@vuma.com / agent123</div>
+        <div>customer@vuma.com / customer123</div>
+      </div>
+    </div>
+  </main>
 
-    <p class="small">Don't have an account? <a href="./signup.html">Sign up</a></p>
-  </div>
-
-  <script src="script.js"></script>
+  <script src="./script.js" defer></script>
 </body>
 </html>
