@@ -1,95 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up - Vuma Lockers</title>
-    <link rel="stylesheet" href="/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up | Parcel Locker System</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <div class="container">
-        <div class="auth-box">
-            <!-- Back to Home -->
-            <div class="back-home">
-                <a href="index.html">← Back to Home</a>
-            </div>
+  <div class="container">
+    <h2>Create an Account</h2>
 
-            <!-- Logo -->
-            <div class="logo">
-                <h1>Vuma Lockers</h1>
-                <p>Create Your Account</p>
-            </div>
+    <form id="signupForm" class="form">
+      <label>Full Name</label>
+      <input type="text" id="signupName" placeholder="Your full name" required />
 
-            <!-- Signup Form -->
-            <form class="auth-form" id="signupForm">
-                <!-- Role Selection -->
-                <div class="form-group">
-                    <label>I want to sign up as:</label>
-                    <select id="userRole" class="form-input" required>
-                        <option value="">Select account type</option>
-                        <option value="customer">Customer</option>
-                        <option value="agent">Delivery Agent</option>
-                    </select>
-                    <small>Administrator accounts are created by system admin</small>
-                </div>
+      <label>Email</label>
+      <input type="email" id="signupEmail" placeholder="you@example.com" required />
 
-                <!-- Personal Information -->
-                <div class="form-group">
-                    <label>Full Name:</label>
-                    <input type="text" id="fullName" class="form-input" placeholder="Enter your full name" required>
-                </div>
+      <label>Password</label>
+      <input type="password" id="signupPassword" placeholder="Enter password" required />
 
-                <!-- Phone Number -->
-                <div class="form-group">
-                    <label>Phone Number:</label>
-                    <div class="phone-input">
-                        <select id="countryCode" style="width: 80px;">
-                            <option value="+254">+254</option>
-                            <option value="+255">+255</option>
-                            <option value="+256">+256</option>
-                        </select>
-                        <input type="tel" id="phone" class="form-input" placeholder="712345678" pattern="[0-9]{9}" required>
-                    </div>
-                </div>
+      <div id="strength" class="hint"></div>
 
-                <!-- Email Input -->
-                <div class="form-group">
-                    <label>Email Address:</label>
-                    <input type="email" id="email" class="form-input" placeholder="Enter your email" required>
-                </div>
+      <button type="submit" class="btn">Sign Up</button>
+    </form>
 
-                <!-- Password Input -->
-                <div class="form-group">
-                    <label>Password:</label>
-                    <input type="password" id="password" class="form-input" placeholder="Create a password" required minlength="6">
-                </div>
+    <p class="small">Already have an account? <a href="./index.html">Login</a></p>
+  </div>
 
-                <!-- Confirm Password -->
-                <div class="form-group">
-                    <label>Confirm Password:</label>
-                    <input type="password" id="confirmPassword" class="form-input" placeholder="Repeat your password" required>
-                </div>
-
-                <!-- Terms Agreement -->
-                <div class="form-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="agreeTerms" required>
-                        I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
-                    </label>
-                </div>
-
-                <!-- Signup Button -->
-                <button type="submit" class="btn btn-primary btn-full">Create Account</button>
-
-                <!-- Login Link -->
-                <div class="auth-link">
-                    <p>Already have an account? <a href="login.html">Login here</a></p>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
-
