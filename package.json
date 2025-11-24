@@ -1,13 +1,13 @@
 {
   "name": "vuma-lockers",
   "version": "1.0.0",
-  "description": "Vuma Lockers - Smart Locker Management System",
-  "main": "index.html",
   "scripts": {
-    "start": "echo 'Open index.html in your browser'",
-    "dev": "echo 'Open index.html in your browser'"
+    "build": "tailwindcss -i ./src/input.css -o ./dist/output.css --minify",
+    "dev": "tailwindcss -i ./src/input.css -o ./dist/output.css --watch"
   },
-  "keywords": ["locker", "management", "school", "project"],
-  "author": "Vuma Lockers Team",
-  "license": "MIT"
+  "devDependencies": {
+    "tailwindcss": "^3.4.0",
+    "postcss": "^8.4.31",
+    "autoprefixer": "^10.4.16"
+  }
 }
