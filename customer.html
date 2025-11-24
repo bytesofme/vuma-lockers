@@ -1,37 +1,46 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Customer — Vuma Parcel Lockers</title>
-  <link rel="stylesheet" href="./style.css" />
+  <title>User Dashboard | Parcel Locker</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">Vuma Parcel Lockers — Customer</div>
+    <div class="brand" id="brandNameUser">Parcel Locker</div>
     <div class="top-actions">
-      <span id="custWelcome" class="muted">Hello</span>
-      <button class="btn" id="logoutBtnCust">Logout</button>
+      <span id="userWelcome"></span>
+      <button id="logoutBtnUser" class="btn small">Logout</button>
     </div>
   </header>
 
-  <main class="container">
-    <section class="panel">
-      <h2>My Parcels</h2>
-      <table class="table" id="userParcelsBody"><thead><tr><th>ID</th><th>Locker</th><th>Status</th><th>OTP</th><th>Action</th></tr></thead><tbody></tbody></table>
-    </section>
+  <main class="dashboard-wrapper single-column">
+    <section class="content">
+      <h2>Your Parcels</h2>
 
-    <section class="panel">
-      <h2>Enter OTP To Pickup</h2>
-      <form id="verifyOtpForm" class="inline">
-        <input id="verifyParcelId" placeholder="Parcel ID e.g. P1623456789" required />
-        <input id="verifyOtp" placeholder="6-digit OTP" required />
-        <button class="btn" type="submit">Verify & Open Locker</button>
-      </form>
-      <div id="otpResult" class="hint"></div>
+      <div id="userStats" class="stats-row">
+        <div class="card"><div class="card-title">Active</div><div id="uActive">0</div></div>
+        <div class="card"><div class="card-title">Delivered</div><div id="uDelivered">0</div></div>
+      </div>
+
+      <h4>My Parcels</h4>
+      <table id="userParcelsTable" class="table">
+        <thead><tr><th>ID</th><th>Locker</th><th>Status</th><th>OTP</th><th>Action</th></tr></thead>
+        <tbody id="userParcelsBody"></tbody>
+      </table>
+
+      <section class="panel">
+        <h3>Request OTP For A Parcel</h3>
+        <form id="requestOtpForm" class="form-inline">
+          <input type="text" id="reqParcelId" placeholder="Parcel ID e.g. P1623456789" required />
+          <button type="submit" class="btn">Request OTP</button>
+        </form>
+        <div id="userOtpResult" class="otp-result"></div>
+      </section>
     </section>
   </main>
 
-  <script src="./script.js" defer></script>
+  <script src="script.js"></script>
 </body>
 </html>
